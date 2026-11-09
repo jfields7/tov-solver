@@ -4,7 +4,9 @@
 // Licensed under the 3-clause BSD License, see LICENSE file for details
 //========================================================================================
 //! \file test_eos.cpp
-//
+//! \brief Tests for constructing an EOS template. Note that these tests do not check the
+//  validity of the EOS; they check that the forwarding functions work correctly and
+//  enforce a strict interface.
 
 #include <iostream>
 #include <cmath>
@@ -42,6 +44,17 @@ class DummyEOS {
   // Enthalpy functions
   double PressureFromLogEnthalpy(double lnh) {
     return std::exp(lnh)/3.0;
+  }
+  double EnergyFromLogEnthalpy(double lnh) {
+    return 2.0*std::exp(lnh)/3.0;
+  }
+
+  // Enthalpy inverses
+  double LogEnthalpyFromPressure(double P) {
+    return std::log(3.0*P);
+  }
+  double LogEnthalpyFromEnergy(double e) {
+    return std::log(3.0*e/2.0);
   }
  public:
 };
@@ -117,6 +130,24 @@ bool TestEnthalpyFunctions() {
   double P = eos.GetPressureFromLogEnthalpy(lnh);
 
   if (P != ts_math::exp(lnh)/3.0) {
+    return false;
+  }
+
+  double e = eos.GetEnergyFromLogEnthalpy(lnh);
+
+  if (e != 2.0*ts_math::exp(lnh)/3.0) {
+    return false;
+  }
+
+  lnh = eos.GetLogEnthalpyFromPressure(P);
+
+  if (lnh != ts_math::log(3.0*P)) {
+    return false;
+  }
+
+  lnh = eos.GetLogEnthalpyFromEnergy(e);
+
+  if (lnh != ts_math::log(3.0*e/2.0)) {
     return false;
   }
 

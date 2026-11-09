@@ -1,5 +1,5 @@
-#ifndef TS_EOS_HPP_
-#define TS_EOS_HPP_
+#ifndef TS_BAROTROPIC_EOS_HPP_
+#define TS_BAROTROPIC_EOS_HPP_
 //========================================================================================
 // TOVSolver library
 // Copyright(C) 2026 Jacob Fields <fields@ias.edu>
@@ -26,6 +26,8 @@ template<class EOSPolicy>
 class BarotropicEOS : public EOSPolicy {
  private:
  public:
+  BarotropicEOS() {}
+
   // Forward functions
 
   //! \func GetPressure
@@ -87,10 +89,37 @@ class BarotropicEOS : public EOSPolicy {
   decltype(auto) GetPressureFromLogEnthalpy(T lnh) {
     FORWARD_FUNC(lnh, EOSPolicy::PressureFromLogEnthalpy);
   }
+
+  //! \func GetEnergyFromLogEnthalpy
+  //! \brief Compute the energy density as a function of log specific pseudo-enthalpy.
+  template<class T>
+  TS_INLINE
+  decltype(auto) GetEnergyFromLogEnthalpy(T lnh) {
+    FORWARD_FUNC(lnh, EOSPolicy::EnergyFromLogEnthalpy);
+  }
+
+  // Enthalpy inverse functions
+
+  //! \func GetLogEnthalpyFromPressure
+  //! \brief Compute the log specific pseudo-enthalpy as a function of pressure.
+  template<class T>
+  TS_INLINE
+  decltype(auto) GetLogEnthalpyFromPressure(T P) {
+    FORWARD_FUNC(P, EOSPolicy::LogEnthalpyFromPressure);
+  }
+
+  //! \func GetLogEnthalpyFromEnergy
+  //! \brief Compute the log specific pseudo-enthalpy as a function of energy density
+  template<class T>
+  TS_INLINE
+  decltype(auto) GetLogEnthalpyFromEnergy(T e) {
+    FORWARD_FUNC(e, EOSPolicy::LogEnthalpyFromEnergy);
+  }
+
 };
 
 #undef FORWARD_FUNC
 
 }; // namespace ts
 
-#endif // TS_EOS_HPP_
+#endif // TS_BAROTROPIC_EOS_HPP_

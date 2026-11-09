@@ -32,8 +32,10 @@ $(OBJ_DIR)%.o : %.cpp
 
 eos : $(OBJ_FILES)
 	$(call make_test,eos,test_eos)
+polytrope : $(OBJ_FILES)
+	$(call make_test,eos,test_polytrope)
 
-tests: dirs eos
+tests: dirs eos polytrope
 
 clean:
 	rm -rf $(OBJ_DIR)*
@@ -41,4 +43,5 @@ clean:
 
 run: dirs tests
 	cd bin; \
-	./test_eos;
+	./test_eos; \
+	./test_polytrope;

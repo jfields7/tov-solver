@@ -26,7 +26,8 @@ template<class EOSPolicy>
 class BarotropicEOS : public EOSPolicy {
  private:
  public:
-  BarotropicEOS() {}
+  template<class... Types>
+  BarotropicEOS(Types... args) : EOSPolicy(args...) {}
 
   // Forward functions
 

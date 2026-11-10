@@ -20,7 +20,15 @@ namespace ts_math = Kokkos;
 #define TS_INLINE inline
 // Math libraries
 #include <cmath>
+#include <limits>
 namespace ts_math = std;
+
+namespace std {
+
+template<class T>
+constexpr T epsilon_v = std::numeric_limits<T>::epsilon();
+
+} // namespace ts_math
 
 #endif
 

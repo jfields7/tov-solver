@@ -34,8 +34,10 @@ eos : $(OBJ_FILES)
 	$(call make_test,eos,test_eos)
 polytrope : $(OBJ_FILES)
 	$(call make_test,eos,test_polytrope)
+tov : $(OBJ_FILES)
+	$(call make_test,tov,test_tov)
 
-tests: dirs eos polytrope
+tests: dirs eos polytrope tov
 
 clean:
 	rm -rf $(OBJ_DIR)*
@@ -44,4 +46,5 @@ clean:
 run: dirs tests
 	cd bin; \
 	./test_eos; \
-	./test_polytrope;
+	./test_polytrope; \
+	./test_tov;

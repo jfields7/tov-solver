@@ -28,6 +28,9 @@ namespace std {
 template<class T>
 constexpr T epsilon_v = std::numeric_limits<T>::epsilon();
 
+template<class T>
+constexpr T quiet_NaN = std::numeric_limits<T>::quiet_NaN();
+
 } // namespace ts_math
 
 #endif

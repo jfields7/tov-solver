@@ -15,6 +15,13 @@
 // Math libraries
 namespace ts_math = Kokkos;
 
+namespace Kokkos {
+
+template<class T>
+constexpr T pi_v = numbers::pi_v<T>;
+
+} // namespace Kokkos
+
 #else
 // Inline functions
 #define TS_INLINE inline
@@ -31,7 +38,11 @@ constexpr T epsilon_v = std::numeric_limits<T>::epsilon();
 template<class T>
 constexpr T quiet_NaN = std::numeric_limits<T>::quiet_NaN();
 
-} // namespace ts_math
+// Pi is not provided as a constant in C++17.
+template<class T>
+constexpr T pi_v = T(3.14159265358979323846);
+
+} // namespace std
 
 #endif
 

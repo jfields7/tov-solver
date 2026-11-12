@@ -3,6 +3,7 @@
 
 #include <testing.hpp>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <vector>
 #include <cmath>
@@ -21,9 +22,9 @@ void PrintBold(const std::string& text) {
 
 void PrintError(double expected, double actual) {
   double error = GetError(expected, actual);
-  std::cout << "  Expected: " << expected << "\n";
-  std::cout << "  Actual: " << actual << "\n";
-  std::cout << "  Error: " << error << "\n";
+  std::cout << "  Expected: " << std::setprecision(17) << expected << "\n";
+  std::cout << "  Actual: " << std::setprecision(17) << actual << "\n";
+  std::cout << "  Error: " << std::setprecision(17) << error << "\n";
 }
 
 double GetError(double expected, double actual) {

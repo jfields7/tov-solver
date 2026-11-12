@@ -19,17 +19,82 @@ class TOV {
   bool initialized;
   T rhoc;
   unsigned int npoints;
-  T dr;
+  T lnhc;
+
+  T mass;
+  T radius;
+
+  void SetToNaN() {
+    initialized = false;
+    rhoc = ts_math::quiet_NaN<T>;
+    npoints = 0;
+
+    mass = ts_math::quiet_NaN<T>;
+    radius = ts_math::quiet_NaN<T>;
+  }
  public:
-  TOV() : initialized(false), rhoc(ts_math::quiet_NaN<T>), npoints(0),
-          dr(ts_math::quiet_NaN<T>) {
+  TOV() {
+    SetToNaN();
   }
 
   template<class EOSPolicy>
-  void ComputeSolution(BarotropicEOS<EOSPolicy>& eos, T rhoc_, unsigned int npoints_,
-                       T dr_) {
+  void ComputeSolution(BarotropicEOS<EOSPolicy>& eos, T rhoc_, unsigned int npoints_) {
     rhoc = rhoc_;
     npoints = npoints_;
+
+    // Compute the central pseudo-enthalpy, which we use as the starting value for our
+    // integration.
+    lnhc = eos.GetLogEnthalpy(rhoc);
+
+    // Initial conditions
+    T u = T(0.);
+    T v = T(0.);
+    // For simplicity, compute the solution with an explicit midpoint method. We'll fix
+    // this later.
+    T dlnh = lnhc/(npoints-1);
+    T one_half = T(1.0/2.0);
+    for (unsigned int i = 0; i < npoints; i++) {
+      T lnh = lnhc - i*dlnh;
+      // First stage
+      T du, dv, u1, v1;
+      ComputeRHS(eos, lnh, u, v, du, dv);
+
+      u1 = u - du*one_half*dlnh;
+      v1 = v - dv*one_half*dlnh;
+
+      // Second stage
+      lnh = lnhc - (i+one_half)*dlnh;
+
+      ComputeRHS(eos, lnh, u1, v1, du, dv);
+
+      u = u - du*dlnh;
+      v = v - dv*dlnh;
+    }
+
+    if (ts_math::isnan(u) || ts_math::isnan(v) || u < T(0) || v < T(0)) {
+      SetToNaN();
+      return;
+    }
+
+    radius = ts_math::sqrt(u);
+    mass = v*radius;
+    initialized = true;
+  }
+
+  template<class EOSPolicy>
+  void ComputeRHS(BarotropicEOS<EOSPolicy>& eos, T lnh, T u, T v, T& du, T& dv) const {
+    T P = eos.GetPressureFromLogEnthalpy(lnh);
+    T e = eos.GetEnergyFromLogEnthalpy(lnh);
+
+    // A regularized solution to use at the center.
+    if (lnh == lnhc) {
+      T D = e + 3*P;
+      du = -T(3.0)/(2*ts_math::pi_v<T>*D);
+      dv = -2*e/D;
+    } else {
+      du = -T(2.0)*(u*(T(1.) - 2*v))/(v + 4*ts_math::pi_v<T>*u*P);
+      dv = (2*ts_math::pi_v<T>*e - v/(2*u))*du;
+    }
   }
 
   TS_INLINE
@@ -43,13 +108,18 @@ class TOV {
   }
 
   TS_INLINE
-  T GetSpacing() const {
-    return dr;
+  unsigned int GetNPoints() const {
+    return npoints;
   }
 
   TS_INLINE
-  unsigned int GetNPoints() const {
-    return npoints;
+  T GetMass() const {
+    return mass;
+  }
+
+  TS_INLINE
+  T GetRadius() const {
+    return radius;
   }
 };
 

@@ -29,39 +29,70 @@ bool TestBuild() {
     return false;
   }
 
-  double dr = tov.GetSpacing();
-  if (!ts_math::isnan(dr)) {
-    std::cout << "Unexpectedly returned non-NaN spacing without being initialized.\n";
-    return false;
-  }
-
   unsigned int npoints = tov.GetNPoints();
   if (npoints > 0) {
     std::cout << "Unexpectedly returned non-zero points without being initialized.\n";
     return false;
   }
 
+  double mass = tov.GetMass();
+
+  if (!ts_math::isnan(mass)) {
+    std::cout << "Unexpectedly returned non-NaN mass without being initialized.\n";
+    return false;
+  }
+
+  double radius = tov.GetRadius();
+
+  if (!ts_math::isnan(radius)) {
+    std::cout << "Unexpectedly returned non-NaN radius without being initialized.\n";
+    return false;
+  }
+
   return true;
 }
 
-/*bool TestPolytrope() {
+bool TestPolytrope() {
   ts::TOV<> tov;
   ts::BarotropicEOS<ts::Polytrope<>> eos{2.0, 100.0};
   
   const double rhoc = 1.28e-3;
-  const unsigned int npoints = 10000;
-  const double dr = 1e-3;
+  const unsigned int npoints = 1280;
 
-  tov.ComputeSolution(eos, rhoc, npoints, dr);
+  tov.ComputeSolution(eos, rhoc, npoints);
+
+  if (ts_math::isnan(tov.GetMass())) {
+    std::cout << "TOV mass is NaN after solution.\n";
+    return false;
+  }
+
+  double err = GetError(1.4, tov.GetMass());
+
+  if (err > 1.e-3) {
+    std::cout << "TOV solution did not return the correct mass.\n";
+    PrintError(1.4, tov.GetMass());
+
+    return false;
+  }
+
+  err = GetError(9.59, tov.GetRadius());
+
+  if (err > 1e-3) {
+    std::cout << "TOV solution did not return the correct radius.\n";
+    PrintError(9.59, tov.GetRadius());
+    
+    return false;
+  }
+
   return true;
-}*/
+}
 
 int main(int argc, char *argv[]) {
   UnitTests tester{"EOS"};
 
   tester.RunTest(&TestBuild, "Build TOV object");
 
-  //tester.RunTest(&TestPolytrope, "Solve TOV with polytropic EOS");
+  tester.RunTest(&TestPolytrope, "Solve TOV with polytropic EOS");
 
   tester.PrintSummary();
 

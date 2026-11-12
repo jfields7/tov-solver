@@ -21,9 +21,10 @@ class Polytrope {
   const T kappa;
   const T igamma;
   const T igammam1;
+  constexpr static T one = T(1.0);
  protected:
-  Polytrope(T gamma_, T kappa_) : gamma(gamma_), kappa(kappa_), igamma(1.0/gamma_),
-                                  igammam1(1.0/(gamma_ - 1.0)) {
+  Polytrope(T gamma_, T kappa_) : gamma(gamma_), kappa(kappa_), igamma(one/gamma_),
+                                  igammam1(one/(gamma_ - one)) {
 
   }
 
@@ -40,14 +41,14 @@ class Polytrope {
   T PressureFromLogEnthalpy(T lnh) const {
     T h = ts_math::exp(lnh);
 
-    return ts_math::pow(ts_math::pow(kappa,-igamma)*(h-1.)*(gamma - 1.)*igamma,
+    return ts_math::pow(ts_math::pow(kappa,-igamma)*(h-one)*(gamma - one)*igamma,
                         gamma*igammam1);
   }
   TS_INLINE
   T LogEnthalpyFromPressure(T P) const {
     T rho = RhoFromPressure(P);
 
-    return ts_math::log(1.0 + gamma*igammam1*(P/rho));
+    return ts_math::log(one + gamma*igammam1*(P/rho));
   }
 
   // Energy functions
@@ -60,8 +61,8 @@ class Polytrope {
     // Note that this relationship is not generally analytically invertible. We therefore
     // employ a bracketed Newton-Raphson solve to find it.
     T ub = e;
-    T lb = 0.0;
-    T rho = 0.5*(lb + ub);
+    T lb = T(0.0);
+    T rho = T(0.5)*(lb + ub);
     const int N = 10;
     const T tol = ts_math::epsilon_v<T>;
     for (int i = 0; i < N; i++) {
@@ -88,24 +89,24 @@ class Polytrope {
   TS_INLINE
   T EnergyFromLogEnthalpy(T lnh) const {
     const T h = ts_math::exp(lnh);
-    const T rho = ts_math::pow((h - 1.0)*(gamma - 1.0)*igamma/kappa, igammam1);
+    const T rho = ts_math::pow((h - one)*(gamma - one)*igamma/kappa, igammam1);
     return rho*h - Pressure(rho);
   }
   TS_INLINE
   T LogEnthalpyFromEnergy(T e) const {
     const T rho = RhoFromEnergy(e);
-    return ts_math::log(1.0 + gamma*igammam1*kappa*ts_math::pow(rho, gamma - 1.0));
+    return ts_math::log(one + gamma*igammam1*kappa*ts_math::pow(rho, gamma - one));
   }
 
   // Enthalpy functions
   TS_INLINE
   T LogEnthalpy(T rho) const {
-    return ts_math::log(1.0 + gamma*igammam1*kappa*ts_math::pow(rho, gamma - 1.0));
+    return ts_math::log(one + gamma*igammam1*kappa*ts_math::pow(rho, gamma - one));
   }
   TS_INLINE
   T RhoFromLogEnthalpy(T lnh) const {
     const T h = ts_math::exp(lnh);
-    return ts_math::pow((h - 1.0)*(gamma - 1.0)*igamma/kappa, igammam1);
+    return ts_math::pow((h - one)*(gamma - one)*igamma/kappa, igammam1);
   }
  public:
   TS_INLINE

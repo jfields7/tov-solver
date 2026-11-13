@@ -49,6 +49,14 @@ bool TestBuild() {
     return false;
   }
 
+  double iso_radius = tov.GetIsotropicRadius();
+
+  if (!ts_math::isnan(iso_radius)) {
+    std::cout <<
+      "Unexpectedly returned non-NaN isotropic radius without being initialized.\n";
+    return false;
+  }
+
   return true;
 }
 
@@ -61,26 +69,39 @@ bool TestPolytrope() {
 
   tov.ComputeSolution(eos, rhoc, npoints);
 
-  if (ts_math::isnan(tov.GetMass())) {
-    std::cout << "TOV mass is NaN after solution.\n";
+  double mass = tov.GetMass();
+  double rad = tov.GetRadius();
+  double iso_rad = tov.GetIsotropicRadius();
+
+  if (ts_math::isnan(mass) || ts_math::isnan(rad) || ts_math::isnan(iso_rad)) {
+    std::cout << "TOV has NaNs after solution.\n";
     return false;
   }
 
-  double err = GetError(1.4, tov.GetMass());
+  double err = GetError(1.4, mass);
 
   if (err > 1.e-3) {
     std::cout << "TOV solution did not return the correct mass.\n";
-    PrintError(1.4, tov.GetMass());
+    PrintError(1.4, mass);
 
     return false;
   }
 
-  err = GetError(9.59, tov.GetRadius());
+  err = GetError(9.59, rad);
 
   if (err > 1e-3) {
     std::cout << "TOV solution did not return the correct radius.\n";
-    PrintError(9.59, tov.GetRadius());
+    PrintError(9.59, rad);
     
+    return false;
+  }
+
+  err = GetError(8.1335, iso_rad);
+
+  if (err > 1e-3) {
+    std::cout <<"TOV solution did not return the correct isotropic radius.\n";
+    PrintError(8.1335, iso_rad);
+
     return false;
   }
 
